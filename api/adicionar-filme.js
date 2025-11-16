@@ -1,19 +1,27 @@
-import fs from 'fs';
-import path from 'path';
+import { Redis } from "@upstash/redis";
 
-export default function handler(req, res) {
-  if (req.method === 'POST') {
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+
+export default async function handler(req, res) {
+  if (req.method !== "POST")
+    return res.status(405).json({ error: "Método não permitido" });
+
+  try {
     const novoFilme = req.body;
 
-    const filePath = path.join(process.cwd(), 'filmes.json');
-    const filmes = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    let filmes = await redis.get("filmes");
+    if (!filmes) filmes = [];
 
     filmes.push(novoFilme);
 
-    fs.writeFileSync(filePath, JSON.stringify(filmes, null, 2));
+    await redis.set("filmes", filmes);
 
     res.status(200).json({ sucesso: true });
-  } else {
-    res.status(405).json({ error: 'Método não permitido' });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ error: "Erro ao adicionar filme" });
   }
 }
