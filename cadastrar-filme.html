@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Filme - StarFilmes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">🎬 StarFilmes</a>
+            <a href="index.html" class="btn btn-secondary">Voltar</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Cadastrar Filme</h2>
+
+        <div class="card bg-secondary p-4 mx-auto" style="max-width: 500px;">
+            <form id="form-filme">
+                <div class="mb-3">
+                    <label>Nome do Filme</label>
+                    <input type="text" class="form-control" required id="nome">
+                </div>
+                <div class="mb-3">
+                    <label>Descrição</label>
+                    <textarea class="form-control" required id="descricao"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Nota (0-5)</label>
+                    <input type="number" step="0.1" min="0" max="5" class="form-control" required id="nota">
+                </div>
+                <div class="mb-3">
+                    <label>URLs das Imagens (separe por vírgula)</label>
+                    <input type="text" class="form-control" required id="imagens" placeholder="https://site.com/img1.jpg, https://site.com/img2.jpg">
+                </div>
+                <button type="submit" class="btn btn-warning w-100">Cadastrar Filme</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form-filme');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const novoFilme = {
+                nome: document.getElementById('nome').value,
+                descricao: document.getElementById('descricao').value,
+                nota: parseFloat(document.getElementById('nota').value),
+                imagens: document.getElementById('imagens').value
+                          .split(',')
+                          .map(url => url.trim())
+                          .filter(url => url)
+            };
+
+            try {
+                const res = await fetch('/api/adicionar-filme', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(novoFilme)
+                });
+
+                const data = await res.json();
+                if (data.sucesso) {
+                    alert('Filme cadastrado com sucesso!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Erro ao cadastrar filme.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao cadastrar filme.');
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarFilmes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #111; color: #fff; }
+        .movie-card { background-color: #1b1b1b; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.1); }
+        .movie-title { font-size: 1.5rem; font-weight: bold; }
+        .rating { color: gold; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">🎬 StarFilmes</a>
+            <div>
+                <a href="cadastrar-filme.html" class="btn btn-warning">Cadastrar Filme</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row g-4" id="filmes-container">
+            <!-- Filmes serão inseridos pelo JS -->
+        </div>
+    </div>
+
+    <footer class="bg-dark text-center text-white py-3 mt-4">
+        © 2025 StarFilmes
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const container = document.getElementById('filmes-container');
+
+        async function mostrarFilmes() {
+            try {
+                const res = await fetch('/api/listar-filmes');
+                const filmes = await res.json();
+
+                container.innerHTML = "";
+                filmes.forEach((filme, index) => {
+                    let carouselItems = filme.imagens.map((img, i) => `
+                        <div class="carousel-item ${i === 0 ? "active" : ""}">
+                            <img src="${img}" class="d-block w-100">
+                        </div>
+                    `).join('');
+
+                    container.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="movie-card">
+                            <div id="carouselFilme${index}" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    ${carouselItems}
+                                </div>
+                                ${filme.imagens.length > 1 ? `
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselFilme${index}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselFilme${index}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>` : ""}
+                            </div>
+                            <div class="p-3">
+                                <h3 class="movie-title">${filme.nome}</h3>
+                                <p>${filme.descricao}</p>
+                                <p class="rating">⭐ ${filme.nota} / 5</p>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            } catch (error) {
+                container.innerHTML = "<p class='text-center'>Erro ao carregar os filmes.</p>";
+                console.error(error);
+            }
+        }
+
+        mostrarFilmes();
+    </script>
+
+</body>
+</html>
